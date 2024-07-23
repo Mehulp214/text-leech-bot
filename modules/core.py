@@ -151,7 +151,8 @@ def time_name():
     return f"{date} {current_time}.mp4"
 
 
-async def download_video(url,cmd, name):
+
+async def download_video(url, cmd, name):
     download_cmd = f'{cmd} -R 25 --fragment-retries 25 --external-downloader aria2c --downloader-args "aria2c: -x 16 -j 32"'
     global failed_counter
     print(download_cmd)
@@ -160,7 +161,7 @@ async def download_video(url,cmd, name):
     if "visionias" in cmd and k.returncode != 0 and failed_counter <= 10:
         failed_counter += 1
         await asyncio.sleep(5)
-        await download_video(url, cmd, name)
+        return await download_video(url, cmd, name)
     failed_counter = 0
     try:
         if os.path.isfile(name):
@@ -174,10 +175,37 @@ async def download_video(url,cmd, name):
             return f"{name}.mp4"
         elif os.path.isfile(f"{name}.mp4.webm"):
             return f"{name}.mp4.webm"
-
-        return name
+        return None
     except FileNotFoundError as exc:
-        return os.path.isfile.splitext[0] + "." + "mp4"
+        return None
+
+# async def download_video(url,cmd, name):
+#     download_cmd = f'{cmd} -R 25 --fragment-retries 25 --external-downloader aria2c --downloader-args "aria2c: -x 16 -j 32"'
+#     global failed_counter
+#     print(download_cmd)
+#     logging.info(download_cmd)
+#     k = subprocess.run(download_cmd, shell=True)
+#     if "visionias" in cmd and k.returncode != 0 and failed_counter <= 10:
+#         failed_counter += 1
+#         await asyncio.sleep(5)
+#         await download_video(url, cmd, name)
+#     failed_counter = 0
+#     try:
+#         if os.path.isfile(name):
+#             return name
+#         elif os.path.isfile(f"{name}.webm"):
+#             return f"{name}.webm"
+#         name = name.split(".")[0]
+#         if os.path.isfile(f"{name}.mkv"):
+#             return f"{name}.mkv"
+#         elif os.path.isfile(f"{name}.mp4"):
+#             return f"{name}.mp4"
+#         elif os.path.isfile(f"{name}.mp4.webm"):
+#             return f"{name}.mp4.webm"
+
+#         return name
+#     except FileNotFoundError as exc:
+#         return os.path.isfile.splitext[0] + "." + "mp4"
 
 
 async def send_doc(bot: Client, m: Message,cc,ka,cc1,prog,count,name):
@@ -192,9 +220,38 @@ async def send_doc(bot: Client, m: Message,cc,ka,cc1,prog,count,name):
     time.sleep(3) 
 
 
-async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
+# async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
+#     subprocess.run(f'ffmpeg -i "{filename}" -ss 00:01:00 -vframes 1 "{filename}.jpg"', shell=True)
+#     await prog.delete (True)
+#     reply = await m.reply_text(f"**⥣ Uploading ...** » `{name}`")
+#     try:
+#         if thumb == "no":
+#             thumbnail = f"{filename}.jpg"
+#         else:
+#             thumbnail = thumb
+#     except Exception as e:
+#         await m.reply_text(str(e))
+
+#     dur = int(duration(filename))
+
+#     start_time = time.time()
+
+#     try:
+#         await m.reply_video(filename,caption=cc, supports_streaming=True,height=720,width=1280,thumb=thumbnail,duration=dur, progress=progress_bar,progress_args=(reply,start_time))
+#     except Exception:
+#         await m.reply_document(filename,caption=cc, progress=progress_bar,progress_args=(reply,start_time))
+#     os.remove(filename)
+
+#     os.remove(f"{filename}.jpg")
+#     await reply.delete (True)
+
+async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
+    if filename is None:
+        await m.reply_text(f"Failed to download video for {name}")
+        return
+
     subprocess.run(f'ffmpeg -i "{filename}" -ss 00:01:00 -vframes 1 "{filename}.jpg"', shell=True)
-    await prog.delete (True)
+    await prog.delete(True)
     reply = await m.reply_text(f"**⥣ Uploading ...** » `{name}`")
     try:
         if thumb == "no":
@@ -209,11 +266,11 @@ async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
     start_time = time.time()
 
     try:
-        await m.reply_video(filename,caption=cc, supports_streaming=True,height=720,width=1280,thumb=thumbnail,duration=dur, progress=progress_bar,progress_args=(reply,start_time))
+        await m.reply_video(filename, caption=cc, supports_streaming=True, height=720, width=1280, thumb=thumbnail, duration=dur, progress=progress_bar, progress_args=(reply, start_time))
     except Exception:
-        await m.reply_document(filename,caption=cc, progress=progress_bar,progress_args=(reply,start_time))
+        await m.reply_document(filename, caption=cc, progress=progress_bar, progress_args=(reply, start_time))
     os.remove(filename)
-
     os.remove(f"{filename}.jpg")
-    await reply.delete (True)
+    await reply.delete(True)
+
     
