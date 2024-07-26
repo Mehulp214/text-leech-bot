@@ -5,7 +5,7 @@ idna
 mutagen
 pyaes
 pycryptodome
-pyrogram
+git+https://github.com/KurimuzonAkuma/pyrogram.git@v2.1.22
 pyromod
 PySocks
 python-dotenv
